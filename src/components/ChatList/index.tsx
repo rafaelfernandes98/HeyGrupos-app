@@ -1,0 +1,68 @@
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ThreadType } from '../../types/Chat';
+import { useNavigation } from '@react-navigation/native';
+import { RouteType } from '../../types/Route';
+import { UserType } from '../../types/User';
+
+type Props = {
+  data: ThreadType;
+  deleteRoom: () => void;
+  userStatus: UserType;
+};
+
+export function ChatList({ data, deleteRoom, userStatus }: Props) {
+  const navigation = useNavigation<RouteType>();
+
+  function openChat() {
+    if (userStatus) {
+      navigation.navigate('Messages', { thread: data });
+    } else {
+      navigation.navigate('SignIn');
+    }
+  }
+  return (
+    <TouchableOpacity
+      onPress={openChat}
+      onLongPress={() => deleteRoom && deleteRoom()}>
+      <View style={styles.row}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.nameText} numberOfLines={1}>
+              {data.name}
+            </Text>
+          </View>
+
+          <Text style={styles.contentText}>{data.lastMessage.text}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: {
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(241, 240, 245, 0.5)',
+    marginVertical: 4,
+  },
+  content: {
+    flexShrink: 1,
+  },
+  header: {
+    flexDirection: 'row',
+  },
+  contentText: {
+    color: '#c1c1c1',
+    fontSize: 16,
+    marginTop: 2,
+  },
+  nameText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+});
