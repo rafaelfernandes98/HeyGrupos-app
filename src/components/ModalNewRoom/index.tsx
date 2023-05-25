@@ -7,14 +7,74 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import { UserType } from '../../types/User';
 
 type Props = {
   setVisible: () => void;
+  setUpdateScreen: () => void;
 };
 
-export function ModalNewRoom({ setVisible }: Props) {
+declare function alert(message?: any): void;
+
+export function ModalNewRoom({ setVisible, setUpdateScreen }: Props) {
   const [roomName, setRoomName] = useState('');
 
+  const user: UserType = auth().currentUser?.toJSON();
+
+  function handleButtonCreate() {
+    if (roomName === '') {
+      return;
+    }
+
+    firestore()
+      .collection('MESSAGE_THREADS')
+      .get()
+      .then(snapshot => {
+        let mythreads = 0;
+        snapshot.docs.map(docItem => {
+          if (docItem.data().owner === user.uid) {
+            mythreads += 1;
+          }
+        });
+
+        if (mythreads >= 4) {
+          alert('Você já atigiu o limite de grupos!');
+        } else {
+          createRoom();
+        }
+      });
+  }
+
+  function createRoom() {
+    firestore()
+      .collection('MESSAGE_THREADS')
+      .add({
+        name: roomName,
+        owner: user.uid,
+        lastMessage: {
+          text: `Grupo ${roomName} criado, Bem vindo(a)!`,
+          created_at: firestore.FieldValue.serverTimestamp(),
+        },
+      })
+      .then(docRef => {
+        docRef
+          .collection('MESSAGES')
+          .add({
+            text: `Grupo ${roomName} criado, Bem vindo(a)!`,
+            created_at: firestore.FieldValue.serverTimestamp(),
+            system: true,
+          })
+          .then(() => {
+            setVisible();
+            setUpdateScreen();
+          });
+      })
+      .catch(error => {
+        console.log('error: ', error);
+      });
+  }
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={setVisible}>
@@ -27,8 +87,13 @@ export function ModalNewRoom({ setVisible }: Props) {
           onChangeText={t => setRoomName(t)}
           placeholder="Nome para a sua sala?"
         />
-        <TouchableOpacity style={styles.buttonCreate}>
+        <TouchableOpacity
+          style={styles.buttonCreate}
+          onPress={handleButtonCreate}>
           <Text style={styles.buttonText}>Criar sala</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={setVisible}>
+          <Text style={styles.backButtonText}>Voltar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -73,5 +138,17 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: 'bold',
     color: '#FFF',
+  },
+  backButton: {
+    marginTop: 10,
+    height: 45,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#2E54D4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#2E54D4',
   },
 });
