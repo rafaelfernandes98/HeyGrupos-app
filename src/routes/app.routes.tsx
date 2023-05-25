@@ -2,11 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignIn from '../pages/SignIn';
 import { ChatRoom } from '../pages/ChatRoom';
-
-// export type StackRoutes = {
-//   SignIn: undefined;
-//   ChatRoom: undefined;
-// };
+import { Messages } from '../pages/Messages';
+import { StackParamList } from '../types/Route';
 
 const AppStack = createNativeStackNavigator();
 
@@ -27,6 +24,13 @@ export function AppRoutes() {
         options={{
           headerShown: false,
         }}
+      />
+      <AppStack.Screen
+        name="Messages"
+        component={Messages}
+        options={({ route }) => ({
+          title: (route.params as StackParamList)?.thread?.name,
+        })}
       />
     </AppStack.Navigator>
   );
