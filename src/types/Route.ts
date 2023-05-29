@@ -4,7 +4,7 @@ import { ThreadType } from './Chat';
 export type RouteType = {
   navigate: (
     route: string,
-    params?: { route: RouteStackParamList },
+    params?: RouteStackParamList,
   ) => NativeStackNavigationOptions;
 };
 
@@ -17,13 +17,4 @@ export type StackParamList = {
   Messages: {
     thread: ThreadType;
   };
-  // outras rotas...
 };
-
-// type Routes = {
-//   SignIn: () => void;
-//   ChatRoom: () => void;
-//   Messages: {
-//     thread?: ThreadType;
-//   };
-// };

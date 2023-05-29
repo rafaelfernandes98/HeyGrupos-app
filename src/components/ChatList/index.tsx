@@ -7,7 +7,7 @@ import { UserType } from '../../types/User';
 
 type Props = {
   data: ThreadType;
-  deleteRoom: () => void;
+  deleteRoom?: () => void;
   userStatus: UserType;
 };
 
